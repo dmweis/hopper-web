@@ -4,49 +4,118 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins.set(bevy::log::LogPlugin { ..default() }),
-            HelloPlugin,
+            bevy_stl::StlPlugin,
         ))
+        .add_systems(Startup, setup)
+        .add_systems(Update, rotate)
         .run();
 }
 
-pub struct HelloPlugin;
+#[derive(Component)]
+struct Shape;
 
-impl Plugin for HelloPlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(GreetTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
-            .add_systems(Startup, add_people)
-            .add_systems(Update, (update_people, greet_people).chain());
-    }
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // commands.insert_resource(AmbientLight {
+    //     color: Color::WHITE,
+    //     brightness: 1.0,
+    // });
+
+    let center_cylinder_handle = meshes.add(Mesh::from(shape::Cylinder {
+        height: 0.2,
+        radius: 0.005,
+        ..Default::default()
+    }));
+    let cylinder_material_handle = materials.add(StandardMaterial {
+        base_color: Color::rgb(1.0, 0., 0.),
+        ..default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: center_cylinder_handle.clone(),
+        material: cylinder_material_handle.clone(),
+        transform: Transform::from_xyz(0.0, 0.1, 0.0),
+        ..default()
+    });
+
+    commands
+        .spawn((
+            PbrBundle {
+                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                ..default()
+            },
+            Shape,
+        ))
+        .with_children(|parent| {
+            parent.spawn(PbrBundle {
+                mesh: asset_server.load("hopper-main-body-with-parts.stl"),
+                // mesh: asset_server.load("hopper-body-old.stl"),
+                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                transform: Transform::from_xyz(-0.045, 0., -0.270 / 2.0)
+                    .with_scale((0.001, 0.001, 0.001).into()),
+                ..Default::default()
+            });
+
+            parent.spawn(PbrBundle {
+                mesh: center_cylinder_handle.clone(),
+                material: cylinder_material_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                ..Default::default()
+            });
+        });
+
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(4.0, 5.0, -4.0),
+        ..default()
+    });
+
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(0.0, 1., 1.0).looking_at(Vec3::new(0., 0., 0.), Vec3::Y),
+        ..default()
+    });
 }
 
-#[derive(Component)]
-struct Person;
+fn rotate(
+    mut query: Query<&mut Transform, With<Shape>>,
+    time: Res<Time>,
+    input: Res<Input<KeyCode>>,
+) {
+    for mut transform in &mut query {
+        let mut direction = Vec3::ZERO;
+        if input.pressed(KeyCode::W) {
+            direction.z -= 1.0
+        }
+        if input.pressed(KeyCode::S) {
+            direction.z += 1.0;
+        }
+        if input.pressed(KeyCode::A) {
+            direction.x -= 1.0;
+        }
+        if input.pressed(KeyCode::D) {
+            direction.x += 1.0;
+        }
 
-#[derive(Component)]
-struct Name(String);
+        transform.translation += time.delta_seconds() * 0.5 * direction;
 
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
-}
+        // rotation
 
-fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Name, With<Person>>) {
-    if timer.0.tick(time.delta()).just_finished() {
-        for name in &query {
-            info!("Hello {}!", name.0);
+        let mut rotation = 0.0;
+        if input.pressed(KeyCode::Q) {
+            rotation += 90_f32.to_radians();
+        }
+        if input.pressed(KeyCode::E) {
+            rotation -= 90_f32.to_radians();
+        }
+        transform.rotate_y(rotation * time.delta_seconds());
+
+        if input.just_pressed(KeyCode::Space) {
+            transform.translation = Vec3::ZERO;
+            transform.rotation = Quat::IDENTITY;
         }
     }
 }
-
-fn update_people(mut query: Query<&mut Name, With<Person>>) {
-    for mut name in &mut query {
-        if name.0 == "Elaina Proctor" {
-            name.0 = "Elaina Hume".to_string();
-            break;
-        }
-    }
-}
-
-#[derive(Resource)]
-struct GreetTimer(Timer);
