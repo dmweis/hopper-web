@@ -53,10 +53,13 @@ fn setup(
         })
         .unwrap(),
     );
+
     let red_material = materials.add(StandardMaterial {
         base_color: Color::rgb(1.0, 0., 0.),
         ..default()
     });
+
+    let hopper_material = materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into());
 
     commands.spawn(PbrBundle {
         mesh: center_cylinder_handle.clone(),
@@ -64,6 +67,20 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.1, 0.0),
         ..default()
     });
+
+    let hopper_main_body_mesh = asset_server.load("hopper-main-body-with-parts.stl");
+    let hopper_coxa_mesh = asset_server.load("hopper-coxa.stl");
+    let hopper_femur_mesh = asset_server.load("hopper-femur.stl");
+    let hopper_tibia_mesh = asset_server.load("hopper-tibia.stl");
+
+    let mm_to_meter_scale: Vec3 = (0.001, 0.001, 0.001).into();
+
+    let red_sphere = PbrBundle {
+        mesh: center_sphere_handle.clone(),
+        material: red_material.clone(),
+        transform: Transform::default(),
+        ..Default::default()
+    };
 
     commands
         .spawn((
@@ -75,20 +92,15 @@ fn setup(
         ))
         .with_children(|parent| {
             parent.spawn(PbrBundle {
-                mesh: asset_server.load("hopper-main-body-with-parts.stl"),
-                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
+                mesh: hopper_main_body_mesh,
+                material: hopper_material.clone(),
                 // main body transforms
                 transform: Transform::from_xyz(-0.045, 0., -0.270 / 2.0)
-                    .with_scale((0.001, 0.001, 0.001).into()),
+                    .with_scale(mm_to_meter_scale),
                 ..Default::default()
             });
 
-            parent.spawn(PbrBundle {
-                mesh: center_sphere_handle.clone(),
-                material: red_material.clone(),
-                transform: Transform::default(),
-                ..Default::default()
-            });
+            parent.spawn(red_sphere.clone());
         });
 
     commands
@@ -101,20 +113,15 @@ fn setup(
         ))
         .with_children(|parent| {
             parent.spawn(PbrBundle {
-                mesh: asset_server.load("hopper-coxa.stl"),
-                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
+                mesh: hopper_coxa_mesh,
+                material: hopper_material.clone(),
                 transform: Transform::from_xyz(0., 0., 0.026)
                     .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
-                    .with_scale((0.001, 0.001, 0.001).into()),
+                    .with_scale(mm_to_meter_scale),
                 ..Default::default()
             });
 
-            parent.spawn(PbrBundle {
-                mesh: center_sphere_handle.clone(),
-                material: red_material.clone(),
-                transform: Transform::default(),
-                ..Default::default()
-            });
+            parent.spawn(red_sphere.clone());
         });
 
     commands
@@ -127,20 +134,15 @@ fn setup(
         ))
         .with_children(|parent| {
             parent.spawn(PbrBundle {
-                mesh: asset_server.load("hopper-femur.stl"),
-                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
+                mesh: hopper_femur_mesh,
+                material: hopper_material.clone(),
                 transform: Transform::from_xyz(-0.024, 0.01, 0.0315)
                     .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
-                    .with_scale((0.001, 0.001, 0.001).into()),
+                    .with_scale(mm_to_meter_scale),
                 ..Default::default()
             });
 
-            parent.spawn(PbrBundle {
-                mesh: center_sphere_handle.clone(),
-                material: red_material.clone(),
-                transform: Transform::default(),
-                ..Default::default()
-            });
+            parent.spawn(red_sphere.clone());
         });
 
     commands
@@ -153,20 +155,15 @@ fn setup(
         ))
         .with_children(|parent| {
             parent.spawn(PbrBundle {
-                mesh: asset_server.load("hopper-tibia.stl"),
-                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
+                mesh: hopper_tibia_mesh,
+                material: hopper_material.clone(),
                 transform: Transform::from_xyz(-0.02, 0.01, 0.0315)
                     .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
-                    .with_scale((0.001, 0.001, 0.001).into()),
+                    .with_scale(mm_to_meter_scale),
                 ..Default::default()
             });
 
-            parent.spawn(PbrBundle {
-                mesh: center_sphere_handle.clone(),
-                material: red_material.clone(),
-                transform: Transform::default(),
-                ..Default::default()
-            });
+            parent.spawn(red_sphere.clone());
         });
 
     // light
