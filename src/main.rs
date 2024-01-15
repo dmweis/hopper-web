@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::camera::ScalingMode};
 
 fn main() {
     App::new()
@@ -40,24 +40,27 @@ fn setup(
 
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // commands.insert_resource(AmbientLight {
-    //     color: Color::WHITE,
-    //     brightness: 1.0,
-    // });
-
     let center_cylinder_handle = meshes.add(Mesh::from(shape::Cylinder {
         height: 0.2,
         radius: 0.005,
         ..Default::default()
     }));
-    let cylinder_material_handle = materials.add(StandardMaterial {
+
+    let center_sphere_handle = meshes.add(
+        Mesh::try_from(shape::Icosphere {
+            radius: 0.005,
+            subdivisions: 7,
+        })
+        .unwrap(),
+    );
+    let red_material = materials.add(StandardMaterial {
         base_color: Color::rgb(1.0, 0., 0.),
         ..default()
     });
 
     commands.spawn(PbrBundle {
         mesh: center_cylinder_handle.clone(),
-        material: cylinder_material_handle.clone(),
+        material: red_material.clone(),
         transform: Transform::from_xyz(0.0, 0.1, 0.0),
         ..default()
     });
@@ -73,7 +76,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-main-body-with-parts.stl"),
-                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
                 // main body transforms
                 transform: Transform::from_xyz(-0.045, 0., -0.270 / 2.0)
                     .with_scale((0.001, 0.001, 0.001).into()),
@@ -81,9 +84,9 @@ fn setup(
             });
 
             parent.spawn(PbrBundle {
-                mesh: center_cylinder_handle.clone(),
-                material: cylinder_material_handle.clone(),
-                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                mesh: center_sphere_handle.clone(),
+                material: red_material.clone(),
+                transform: Transform::default(),
                 ..Default::default()
             });
         });
@@ -99,7 +102,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-coxa.stl"),
-                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
                 transform: Transform::from_xyz(0., 0., 0.026)
                     .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
                     .with_scale((0.001, 0.001, 0.001).into()),
@@ -107,9 +110,9 @@ fn setup(
             });
 
             parent.spawn(PbrBundle {
-                mesh: center_cylinder_handle.clone(),
-                material: cylinder_material_handle.clone(),
-                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                mesh: center_sphere_handle.clone(),
+                material: red_material.clone(),
+                transform: Transform::default(),
                 ..Default::default()
             });
         });
@@ -125,7 +128,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-femur.stl"),
-                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
                 transform: Transform::from_xyz(-0.024, 0.01, 0.0315)
                     .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
                     .with_scale((0.001, 0.001, 0.001).into()),
@@ -133,9 +136,9 @@ fn setup(
             });
 
             parent.spawn(PbrBundle {
-                mesh: center_cylinder_handle.clone(),
-                material: cylinder_material_handle.clone(),
-                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                mesh: center_sphere_handle.clone(),
+                material: red_material.clone(),
+                transform: Transform::default(),
                 ..Default::default()
             });
         });
@@ -151,7 +154,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-tibia.stl"),
-                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into()),
                 transform: Transform::from_xyz(-0.02, 0.01, 0.0315)
                     .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
                     .with_scale((0.001, 0.001, 0.001).into()),
@@ -159,22 +162,48 @@ fn setup(
             });
 
             parent.spawn(PbrBundle {
-                mesh: center_cylinder_handle.clone(),
-                material: cylinder_material_handle.clone(),
-                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                mesh: center_sphere_handle.clone(),
+                material: red_material.clone(),
+                transform: Transform::default(),
                 ..Default::default()
             });
         });
 
+    // light
     commands.spawn(PointLightBundle {
         transform: Transform::from_xyz(4.0, 5.0, -4.0),
         ..default()
     });
 
+    // commands.insert_resource(AmbientLight {
+    //     color: Color::WHITE,
+    //     brightness: 1.0,
+    // });
+
+    // camera
+    // commands.spawn(Camera3dBundle {
+    //     transform: Transform::from_xyz(0., 0., 2.0).looking_at(Vec3::new(0., 0., 0.), Vec3::Y),
+    //     ..default()
+    // });
+
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 1., 1.0).looking_at(Vec3::new(0., 0., 0.), Vec3::Y),
+        transform: Transform::from_xyz(0., 1., 1.).looking_at(Vec3::new(0., 0., 0.), Vec3::Y),
+        projection: Projection::Orthographic(OrthographicProjection {
+            scale: 1.0,
+            scaling_mode: ScalingMode::FixedVertical(1.0),
+            ..Default::default()
+        }),
         ..default()
     });
+
+    // commands.spawn(Camera3dBundle {
+    //     transform: Transform::from_xyz(0., 0., 2.0).looking_at(Vec3::new(0., 0., 0.), Vec3::Y),
+    //     projection: Projection::Perspective(PerspectiveProjection {
+    //         fov: 100_f32.to_radians(),
+    //         ..Default::default()
+    //     }),
+    //     ..default()
+    // });
 }
 
 fn rotate(
