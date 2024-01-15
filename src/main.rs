@@ -12,7 +12,26 @@ fn main() {
 }
 
 #[derive(Component)]
-struct Shape;
+struct MainBody;
+
+#[derive(Component)]
+struct Coxa;
+
+#[derive(Component)]
+struct Femur;
+
+#[derive(Component)]
+struct Tibia;
+
+#[derive(Component)]
+enum LegFlag {
+    LeftFront,
+    LeftMiddle,
+    LeftRead,
+    RightFront,
+    RightMiddle,
+    RightRear,
+}
 
 fn setup(
     mut commands: Commands,
@@ -49,13 +68,13 @@ fn setup(
                 transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..default()
             },
-            Shape,
+            MainBody,
         ))
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-main-body-with-parts.stl"),
-                // mesh: asset_server.load("hopper-body-old.stl"),
                 material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                // main body transforms
                 transform: Transform::from_xyz(-0.045, 0., -0.270 / 2.0)
                     .with_scale((0.001, 0.001, 0.001).into()),
                 ..Default::default()
@@ -69,26 +88,83 @@ fn setup(
             });
         });
 
-    commands.spawn(PbrBundle {
-        mesh: asset_server.load("hopper-femur.stl"),
-        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
-        ..Default::default()
-    });
+    commands
+        .spawn((
+            PbrBundle {
+                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                ..default()
+            },
+            Coxa,
+        ))
+        .with_children(|parent| {
+            parent.spawn(PbrBundle {
+                mesh: asset_server.load("hopper-coxa.stl"),
+                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                transform: Transform::from_xyz(0., 0., 0.026)
+                    .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
+                    .with_scale((0.001, 0.001, 0.001).into()),
+                ..Default::default()
+            });
 
-    commands.spawn(PbrBundle {
-        mesh: asset_server.load("hopper-coxa.stl"),
-        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
-        ..Default::default()
-    });
+            parent.spawn(PbrBundle {
+                mesh: center_cylinder_handle.clone(),
+                material: cylinder_material_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                ..Default::default()
+            });
+        });
 
-    commands.spawn(PbrBundle {
-        mesh: asset_server.load("hopper-tibia.stl"),
-        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
-        ..Default::default()
-    });
+    commands
+        .spawn((
+            PbrBundle {
+                transform: Transform::from_xyz(0., 0., 0.),
+                ..default()
+            },
+            Femur,
+        ))
+        .with_children(|parent| {
+            parent.spawn(PbrBundle {
+                mesh: asset_server.load("hopper-femur.stl"),
+                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                transform: Transform::from_xyz(-0.01, 0., 0.0315)
+                    // .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
+                    .with_scale((0.001, 0.001, 0.001).into()),
+                ..Default::default()
+            });
+
+            parent.spawn(PbrBundle {
+                mesh: center_cylinder_handle.clone(),
+                material: cylinder_material_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                ..Default::default()
+            });
+        });
+
+    commands
+        .spawn((
+            PbrBundle {
+                transform: Transform::from_xyz(0.0, 0.0, 0.5),
+                ..default()
+            },
+            Tibia,
+        ))
+        .with_children(|parent| {
+            parent.spawn(PbrBundle {
+                mesh: asset_server.load("hopper-tibia.stl"),
+                material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+                transform: Transform::from_xyz(-0.01, 0., 0.0315)
+                    // .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
+                    .with_scale((0.001, 0.001, 0.001).into()),
+                ..Default::default()
+            });
+
+            parent.spawn(PbrBundle {
+                mesh: center_cylinder_handle.clone(),
+                material: cylinder_material_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                ..Default::default()
+            });
+        });
 
     commands.spawn(PointLightBundle {
         transform: Transform::from_xyz(4.0, 5.0, -4.0),
@@ -102,7 +178,7 @@ fn setup(
 }
 
 fn rotate(
-    mut query: Query<&mut Transform, With<Shape>>,
+    mut query: Query<&mut Transform, With<MainBody>>,
     time: Res<Time>,
     input: Res<Input<KeyCode>>,
 ) {
