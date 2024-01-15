@@ -64,7 +64,7 @@ fn setup(
 
     commands
         .spawn((
-            PbrBundle {
+            SpatialBundle {
                 transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..default()
             },
@@ -90,8 +90,8 @@ fn setup(
 
     commands
         .spawn((
-            PbrBundle {
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            SpatialBundle {
+                transform: Transform::from_xyz(0.5, 0.0, 0.5),
                 ..default()
             },
             Coxa,
@@ -116,8 +116,8 @@ fn setup(
 
     commands
         .spawn((
-            PbrBundle {
-                transform: Transform::from_xyz(0., 0., 0.),
+            SpatialBundle {
+                transform: Transform::from_xyz(-0.5, 0., 0.5),
                 ..default()
             },
             Femur,
@@ -126,8 +126,8 @@ fn setup(
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-femur.stl"),
                 material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-                transform: Transform::from_xyz(-0.01, 0., 0.0315)
-                    // .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
+                transform: Transform::from_xyz(-0.024, 0.01, 0.0315)
+                    .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
                     .with_scale((0.001, 0.001, 0.001).into()),
                 ..Default::default()
             });
@@ -152,8 +152,8 @@ fn setup(
             parent.spawn(PbrBundle {
                 mesh: asset_server.load("hopper-tibia.stl"),
                 material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-                transform: Transform::from_xyz(-0.01, 0., 0.0315)
-                    // .with_rotation(Quat::from_axis_angle(Vec3::X, -90_f32.to_radians()))
+                transform: Transform::from_xyz(-0.02, 0.01, 0.0315)
+                    .with_rotation(Quat::from_axis_angle(Vec3::Z, -90_f32.to_radians()))
                     .with_scale((0.001, 0.001, 0.001).into()),
                 ..Default::default()
             });
