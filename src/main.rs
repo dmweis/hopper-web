@@ -69,6 +69,27 @@ fn setup(
             });
         });
 
+    commands.spawn(PbrBundle {
+        mesh: asset_server.load("hopper-femur.stl"),
+        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
+        ..Default::default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: asset_server.load("hopper-coxa.stl"),
+        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
+        ..Default::default()
+    });
+
+    commands.spawn(PbrBundle {
+        mesh: asset_server.load("hopper-tibia.stl"),
+        material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+        transform: Transform::from_xyz(0., 0., 0.).with_scale((0.001, 0.001, 0.001).into()),
+        ..Default::default()
+    });
+
     commands.spawn(PointLightBundle {
         transform: Transform::from_xyz(4.0, 5.0, -4.0),
         ..default()
