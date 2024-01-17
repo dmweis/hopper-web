@@ -25,6 +25,19 @@ enum LegFlag {
     RightRear,
 }
 
+impl LegFlag {
+    fn is_left(&self) -> bool {
+        matches!(
+            self,
+            LegFlag::LeftFront | LegFlag::LeftMiddle | LegFlag::LeftRear
+        )
+    }
+
+    fn is_right(&self) -> bool {
+        !self.is_left()
+    }
+}
+
 #[derive(Component)]
 struct MainBody;
 
@@ -65,8 +78,10 @@ fn setup(
         ..default()
     });
 
-    let hopper_material = materials.add(Color::rgba(0.0, 0.0, 1.0, 0.2).into());
-    let hopper_material_red = materials.add(Color::rgba(1.0, 0., 0., 0.3).into());
+    let hopper_material_blue = materials.add(Color::rgba(0.0, 0.0, 1.0, 0.3).into());
+    let hopper_material_purple = materials.add(Color::rgba(1., 0., 1., 0.3).into());
+    let hopper_material_cyan = materials.add(Color::rgba(0., 1., 1., 0.3).into());
+    let hopper_material_red = materials.add(Color::rgba(1., 0., 0., 0.3).into());
 
     commands.spawn(PbrBundle {
         mesh: center_cylinder_handle.clone(),
@@ -100,7 +115,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn(PbrBundle {
                 mesh: hopper_main_body_mesh,
-                material: hopper_material.clone(),
+                material: hopper_material_blue.clone(),
                 // main body transforms
                 transform: Transform::from_xyz(-0.045, 0., -0.270 / 2.0)
                     .with_scale(mm_to_meter_scale),
@@ -136,7 +151,7 @@ fn setup(
                 .with_children(|parent| {
                     parent.spawn(build_coxa(
                         hopper_coxa_mesh.clone(),
-                        hopper_material.clone(),
+                        hopper_material_purple.clone(),
                     ));
                     parent.spawn(red_sphere.clone());
                 })
@@ -159,7 +174,7 @@ fn setup(
                 .with_children(|parent| {
                     parent.spawn(build_femur(
                         hopper_femur_mesh.clone(),
-                        hopper_material.clone(),
+                        hopper_material_cyan.clone(),
                     ));
                     parent.spawn(red_sphere.clone());
                 })
@@ -243,11 +258,16 @@ fn rotate_femurs(mut query: Query<&mut Transform, With<Femur>>, time: Res<Time>)
     }
 }
 
-fn rotate_coxas(mut query: Query<&mut Transform, With<Coxa>>, time: Res<Time>) {
-    for mut transform in &mut query {
+fn rotate_coxas(mut query: Query<(&mut Transform, &Coxa)>, time: Res<Time>) {
+    for (mut transform, coxa) in &mut query {
+        let offset = if coxa.0.is_left() {
+            90_f32.to_radians()
+        } else {
+            -90_f32.to_radians()
+        };
         *transform = transform.with_rotation(Quat::from_axis_angle(
             Vec3::Y,
-            time.elapsed_seconds().sin() + 90_f32.to_radians(),
+            time.elapsed_seconds().sin() / 2. + offset,
         ));
     }
 }
