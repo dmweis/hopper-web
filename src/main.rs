@@ -78,10 +78,10 @@ fn setup(
         ..default()
     });
 
-    let hopper_material_blue = materials.add(Color::rgba(0.0, 0.0, 1.0, 0.3).into());
-    let hopper_material_purple = materials.add(Color::rgba(1., 0., 1., 0.3).into());
-    let hopper_material_cyan = materials.add(Color::rgba(0., 1., 1., 0.3).into());
-    let hopper_material_red = materials.add(Color::rgba(1., 0., 0., 0.3).into());
+    let hopper_material_blue = materials.add(Color::rgba(0.0, 0.0, 1.0, 1.).into());
+    let hopper_material_purple = materials.add(Color::rgba(1., 0., 1., 1.).into());
+    let hopper_material_cyan = materials.add(Color::rgba(0., 1., 1., 1.).into());
+    let hopper_material_red = materials.add(Color::rgba(1., 0., 0., 1.).into());
 
     commands.spawn(PbrBundle {
         mesh: center_cylinder_handle.clone(),
@@ -142,7 +142,8 @@ fn setup(
             let coxa_id = parent
                 .spawn((
                     SpatialBundle {
-                        transform: Transform::from_xyz(x, 0.0, z)
+                        // 0.02 is ground height to mid motor
+                        transform: Transform::from_xyz(x, 0.02, z)
                             .with_rotation(Quat::from_axis_angle(Vec3::Y, rotation)),
                         ..default()
                     },
@@ -166,6 +167,7 @@ fn setup(
             let femur_id = parent
                 .spawn((
                     SpatialBundle {
+                        // 0.044 is coxa length
                         transform: Transform::from_xyz(0., 0., 0.044),
                         ..default()
                     },
@@ -188,6 +190,7 @@ fn setup(
             parent
                 .spawn((
                     PbrBundle {
+                        // 0.07 is femur length
                         transform: Transform::from_xyz(0.0, 0.0, 0.07),
                         ..default()
                     },
